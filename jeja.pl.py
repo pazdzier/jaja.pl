@@ -2,14 +2,21 @@
 
 import random
 import re
-import requests
+import time
+
 from bs4 import BeautifulSoup
+import cloudscraper
+
+SCRAPER = cloudscraper.CloudScraper()
 
 
 def list_topics() -> list:
 
     url = r"https://dowcipy.jeja.pl"
-    result = requests.get(url, timeout=10)
+
+    result = SCRAPER.get(url)
+    print()
+
     topics = (
         BeautifulSoup(result.text, "html.parser")
         .find_all("div", {"class": "menu-right"})[-1]
@@ -31,7 +38,7 @@ def draw_topic():
 
 def scrap_links_under_pagination(url):
 
-    result = requests.get(url, timeout=10)
+    result = SCRAPER.get(url, timeout=10)
     latest_page = BeautifulSoup(result.text, "html.parser").find_all(
         "a", {"class": "pagination-number"}
     )[-1]
@@ -53,7 +60,7 @@ def draw_page(url):
 def scrap_jokes(url: str = r"https://dowcipy.jeja.pl/nowe,4,binladen.html"):
 
     page = draw_page(url)
-    result = requests.get(page, timeout=10)
+    result = SCRAPER.get(page)
     boxes = BeautifulSoup(result.text, "html.parser").find_all(
         "div", {"class": "dow-left-text"}
     )
@@ -64,6 +71,7 @@ def scrap_jokes(url: str = r"https://dowcipy.jeja.pl/nowe,4,binladen.html"):
 def draw_joke():
 
     url = draw_topic()
+    time.sleep(1)
     jokes = scrap_jokes(url)
     jokes = list(jokes)
     chosen = random.choice(jokes)
@@ -71,4 +79,5 @@ def draw_joke():
     print(f"{okcyan}{chosen}")
 
 
-draw_joke()
+if __name__ == "__main__":
+    draw_joke()
